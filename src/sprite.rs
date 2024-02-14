@@ -243,6 +243,14 @@ impl SpriteInner {
         pd_func_caller!((*self.playdate_sprite).setDrawMode, self.raw_sprite, mode)
     }
 
+    pub fn set_clip_rect(&self, rect: LCDRect) -> Result<(), Error> {
+        pd_func_caller!((*self.playdate_sprite).setClipRect, self.raw_sprite, rect)
+    }
+
+    pub fn clear_clip_rect(&self) -> Result<(), Error> {
+        pd_func_caller!((*self.playdate_sprite).clearClipRect, self.raw_sprite)
+    }
+
     pub fn set_visible(&mut self, visible: bool) -> Result<(), Error> {
         pd_func_caller!(
             (*self.playdate_sprite).setVisible,
@@ -446,6 +454,20 @@ impl Sprite {
             .try_borrow_mut()
             .map_err(Error::msg)?
             .set_draw_mode(mode)
+    }
+
+    pub fn set_clip_rect(&mut self, clip_rect: LCDRect) -> Result<(), Error> {
+        self.inner
+            .try_borrow_mut()
+            .map_err(Error::msg)?
+            .set_clip_rect(clip_rect)
+    }
+
+    pub fn clear_clip_rect(&mut self, clip_rect: LCDRect) -> Result<(), Error> {
+        self.inner
+            .try_borrow_mut()
+            .map_err(Error::msg)?
+            .clear_clip_rect()
     }
 
     pub fn move_to(&mut self, x: f32, y: f32) -> Result<(), Error> {
