@@ -254,6 +254,18 @@ impl SpriteInner {
         Ok(())
     }
 
+    pub fn set_stencil_pattern(&mut self, mut pattern: [u8; 8]) -> Result<(), Error> {
+        pd_func_caller!(
+            (*self.playdate_sprite).setStencilPattern,
+            self.raw_sprite,
+            // The pattern isn't actually modified by setStencilPattern, but the signature in the C
+            // header doesn't reveal this.
+            pattern.as_mut_ptr(),
+        )?;
+        self.stencil = None;
+        Ok(())
+    }
+
     pub fn clear_stencil(&mut self) -> Result<(), Error> {
         pd_func_caller!((*self.playdate_sprite).clearStencil, self.raw_sprite)?;
         self.stencil = None;
@@ -478,6 +490,13 @@ impl Sprite {
             .try_borrow_mut()
             .map_err(Error::msg)?
             .set_stencil(stencil)
+    }
+
+    pub fn set_stencil_pattern(&mut self, pattern: [u8; 8]) -> Result<(), Error> {
+        self.inner
+            .try_borrow_mut()
+            .map_err(Error::msg)?
+            .set_stencil_pattern(pattern)
     }
 
     pub fn clear_stencil(&mut self) -> Result<(), Error> {
