@@ -116,6 +116,7 @@ pub struct SpriteInner {
     pub raw_sprite: *mut crankstart_sys::LCDSprite,
     playdate_sprite: *const playdate_sprite,
     image: Option<Bitmap>,
+    stencil: Option<Bitmap>,
     userdata: Option<Rc<dyn core::any::Any>>,
 }
 
@@ -241,6 +242,22 @@ impl SpriteInner {
 
     pub fn set_draw_mode(&self, mode: LCDBitmapDrawMode) -> Result<(), Error> {
         pd_func_caller!((*self.playdate_sprite).setDrawMode, self.raw_sprite, mode)
+    }
+
+    pub fn set_stencil(&mut self, stencil: Bitmap) -> Result<(), Error> {
+        pd_func_caller!(
+            (*self.playdate_sprite).setStencil,
+            self.raw_sprite,
+            stencil.inner.borrow().raw_bitmap,
+        )?;
+        self.stencil = Some(stencil);
+        Ok(())
+    }
+
+    pub fn clear_stencil(&mut self) -> Result<(), Error> {
+        pd_func_caller!((*self.playdate_sprite).clearStencil, self.raw_sprite)?;
+        self.stencil = None;
+        Ok(())
     }
 
     pub fn set_clip_rect(&self, rect: LCDRect) -> Result<(), Error> {
@@ -456,6 +473,20 @@ impl Sprite {
             .set_draw_mode(mode)
     }
 
+    pub fn set_stencil(&mut self, stencil: Bitmap) -> Result<(), Error> {
+        self.inner
+            .try_borrow_mut()
+            .map_err(Error::msg)?
+            .set_stencil(stencil)
+    }
+
+    pub fn clear_stencil(&mut self) -> Result<(), Error> {
+        self.inner
+            .try_borrow_mut()
+            .map_err(Error::msg)?
+            .clear_stencil()
+    }
+
     pub fn set_clip_rect(&mut self, clip_rect: LCDRect) -> Result<(), Error> {
         self.inner
             .try_borrow_mut()
@@ -592,6 +623,7 @@ impl SpriteManager {
                 raw_sprite,
                 playdate_sprite: self.playdate_sprite,
                 image: None,
+                stencil: None,
                 userdata: None,
             };
             sprite.set_update_function(unsafe { SPRITE_UPDATE.expect("SPRITE_UPDATE") })?;
