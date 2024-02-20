@@ -27,7 +27,7 @@ pub fn rect_make(x: f32, y: f32, width: f32, height: f32) -> PDRect {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub enum LCDColor {
     Solid(LCDSolidColor),
     Pattern(LCDPattern),
