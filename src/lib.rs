@@ -281,7 +281,7 @@ macro_rules! crankstart_game {
 }
 
 fn abort_with_addr(addr: usize) -> ! {
-    let p = addr as *mut i32;
+    let p = addr as *mut u8;
     unsafe {
         *p = 0;
     }
